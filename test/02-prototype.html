@@ -1,0 +1,122 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>原型链</title>
+</head>
+
+<body>
+  <!-- 
+    构造函数（扩展）
+    1.var a = {} 其实是 var a = new Object()的语法糖  （a 的构造函数是 Object 函数）
+    2.var a = [] 其实是 var a = new Array()的语法糖    （a 的构造函数是 Array 函数）
+    3.function Foo(){...}其实是 var Foo = new Function(...)     （Foo 的构造函数是 Function 函数）
+    4.使用 instanceof 判断一个函数是否是一个变量的构造函数   (判断一个变量是否为“数组”  变量 instanceof Array)
+    原型规则
+    1.所有的引用类型（数组、对象、函数）都具有对象特性，即可自由扩展属性（除了“null”）
+    2.所有的引用类型（数组、对象、函数）都有一个 _proto_ 属性(隐式原型属性），属性值是一个普通的对象
+    3.所有的函数，都有一个 prototype(显式原型）属性，属性值也是一个普通的对象
+    4. 所有的引用类型（数组、对象、函数）， _proto_ 属性值(隐式原型属性）指向它的构造函数的“prototype”属性值
+    当试图得到一个对象的某个属性时，如果这个对象本身没有这个属性，那么会去它的_proto_(即它的构造函数的 prototype（显式原型）)中寻找
+    5.无论函数是自身的属性还是从原型中得到的属性， this 永远指向 f 自身
+    6.循环对象自身的属性if (f.hasOwnProperty(item)) 中遍历 f 时，判断遍历中的 item,
+    是否可以通过 hasOwnProperty 验证，通过则表明它是 f 自身的属性，未通过则表明 是 f 通过原型获得的属性
+    原型链
+    f.toString(),当这个对象没有这个属性的时候，去它自身的隐式原型中找，它自身的隐式原型就是它构造函数（Foo）的显式原型（Foo.prototype
+    但显式原型（Foo.prototype）中并没有 toString ;但显式原型（Foo.prototype）也是对象，也要在它的隐式原型中找，
+    即在其构造函数 （Object ）的显式原型中去找 toString. 故要在 f._proto_(隐式原型）的._proto_(隐式原型）中找，如图所示，故输出 null
+    方框为 构造函数，圆框为 对象，特例：Object.prototype 的 隐式原型是 null （JS避免死循环）
+  -->
+  <div>
+    <img src="img/原型链.png" alt="原型链">
+  </div>
+
+  <script>
+    // 使用var关键字声明的全局作用域变量属于window对象。而let不属于window对象
+    // 使用var关键字声明的变量在任何地方都可以修改。
+    // 在相同的作用域或块级作用域中，不能使用let和const关键字来重置var、let和const关键字声明的变量。。
+    // let和const关键字在不同作用域，或不同块级作用域中是可以重新声明赋值的。
+    // var关键字定义的变量可以先使用后声明。let无变量提升
+    // const关键字定义的常量，声明时必须进行初始化，且初始化后不可再修改。
+    // const 的本质: const 定义的变量并非常量，并非不可变，它定义了一个常量引用一个值。
+    // 使用 const 定义的对象或者数组，其实是可变的。但是我们不能对常量对象重新赋值
+
+    // 1、在对象方法中， this 指向调用它所在方法的对象。
+    // 2、单独使用 this，它指向全局(Global)对象。
+    // 3、函数使用中，this 指向函数的所属者。
+    // 4、严格模式下函数是没有绑定到 this 上，这时候 this 是 undefined。
+    // 5、在 HTML 事件句柄中，this 指向了接收事件的 HTML 元素。
+    // 6、apply 和 call 允许切换函数执行的上下文环境（context），即 this 绑定的对象，可以将 this 引用到任何对象。
+    "use strict";
+    function myFunction() {
+      return this;
+    }
+    // 显式函数绑定
+    // 在 JavaScript 中函数也是对象，对象则有方法，apply 和 call 就是函数对象的方法。这两个方法异常强大，他们允许切换函数执行的上下文环境（context），即 this 绑定的对象。
+    // 在下面实例中，当我们使用 person2 作为参数来调用 person1.fullName 方法时, this 将指向 person2, 即便它是 person1 的方法：
+    var person1 = {
+      fullName: function() {
+        return this.firstName + " " + this.lastName;
+      }
+    }
+    var person2 = {
+      firstName:"John",
+      lastName: "Doe",
+    }
+    person1.fullName.call(person2);  // 返回 "John Doe"
+  </script>
+
+  <script>
+    console.log(Number(['0']), Number([null]), Number(undefined))
+    console.log(null == undefined, [null] == '', [] == '')
+    console.log([null] == '0', [null] == [], [null] == [0], [null] == [''], [null] == ['0'])
+    console.log([] == [''], [] == [], {} == {}, null == {}, null == 0)
+    console.log(5 + '5', '5' + 5)
+  </script>
+  
+  <script>
+    // prototype继承
+    // 所有的 JavaScript 对象都会从一个 prototype（原型对象）中继承属性和方法：
+    // Date 对象从 Date.prototype 继承。
+    // Array 对象从 Array.prototype 继承。
+    // Person 对象从 Person.prototype 继承。
+    // 所有 JavaScript 中的对象都是位于原型链顶端的 Object 的实例。
+    // JavaScript 对象有一个指向一个原型对象的链。当试图访问一个对象的属性时，它不仅仅在该对象上搜寻，还会搜寻该对象的原型，
+    // 以及该对象的原型的原型，依次层层向上搜索，直到找到一个名字匹配的属性或到达原型链的末尾。
+    // Date 对象, Array 对象, 以及 Person 对象从 Object.prototype 继承。
+    function Person(id, name) {
+      this.id = id
+      this.name = name
+    }
+    var p1 = new Person(1, 'zhangsan', 30)
+    Person.prototype.age = 20
+    console.log(p1.__proto__)
+    console.log(p1.constructor)
+    console.log(Person.prototype === p1.__proto__)
+    console.log(Object.prototype.__proto__ === null)
+    console.log(p1)
+    console.log(Person)
+
+    // 闭包：闭包是一种保护私有变量的机制，在函数执行时形成私有的作用域，保护里面的私有变量不受外界干扰。
+    // 直观的说就是形成一个不销毁的栈环境。
+    // 闭包实例
+    var add = (function () {
+      var counter = 0
+      return function () {
+        console.log(counter)
+        return counter += 1
+      }
+    })()
+    add()
+    add()
+    add()
+    // 实例解析
+    // 变量 add 指定了函数自我调用的返回字值。
+    // 自我调用函数只执行一次。设置计数器为 0。并返回函数表达式。
+    // add变量可以作为一个函数使用。非常棒的部分是它可以访问函数上一层作用域的计数器。
+    // 这个叫作 JavaScript 闭包。它使得函数拥有私有变量变成可能。
+    // 计数器受匿名函数的作用域保护，只能通过 add 方法修改。
+  </script>
+</body>
+
+</html>
